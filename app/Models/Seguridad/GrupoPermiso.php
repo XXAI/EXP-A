@@ -21,4 +21,12 @@ class GrupoPermiso extends Model
     protected $fillable = [
         'nombre'
     ];
+
+    /**
+     * Get all of the posts for the country.
+     */
+    public function permisos()
+    {
+        return $this->hasMany('App\Models\Seguridad\Permiso','grupo_id');
+    }
 }

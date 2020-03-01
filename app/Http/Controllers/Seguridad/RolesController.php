@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Seguridad;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
-use \DB;
+use \DB, \Response, \Exception; 
 
 use App\Http\Controllers\Controller;
 use App\Models\Seguridad\Rol;
@@ -19,9 +20,35 @@ class RolesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $params = $request->input();
+        if(isset($params["all"])){
+            
+            return response()->json(["data"=>Rol::all()]);
+        } else {
+            if(!isset($params['pageSize'])){
+                $params['pageSize'] = 1;
+            }
+            
+           
+            $items = Rol::select();
+            if(isset($params['orderBy']) && trim($params['orderBy'])!= ""){
+                $sortOrder = 'asc';
+                if(isset($params['sortOrder'])){
+                    $sortOrder = $params['sortOrder'];
+                }
+    
+                $items = $items->orderBy($params['orderBy'],$sortOrder);
+            }
+            if(isset($params['filter']) && trim($params['filter'])!= ""){
+                $items = $items->where("nombre","LIKE", "%".$params['filter']."%");
+            }
+            
+            $items = $items->paginate($params['pageSize']);
+            
+            return response()->json($items);
+        }
     }
 
     /**

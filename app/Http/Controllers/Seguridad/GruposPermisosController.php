@@ -12,7 +12,6 @@ use \DB, \Response, \Exception;
 use App\Http\Controllers\Controller;
 use App\Models\Seguridad\GrupoPermiso;
 
-
 class GruposPermisosController extends Controller
 {
     /**
@@ -25,8 +24,12 @@ class GruposPermisosController extends Controller
         //
         $params = $request->input();
         if(isset($params["all"])){
+            if(isset($params["permisos"])){
+                return response()->json(["data"=>GrupoPermiso::with(["permisos"])->get()]);
+            } else {
+                return response()->json(["data"=>GrupoPermiso::all()]);
+            }
             
-            return response()->json(["data"=>GrupoPermiso::all()]);
         } else {
             if(!isset($params['pageSize'])){
                 $params['pageSize'] = 1;
