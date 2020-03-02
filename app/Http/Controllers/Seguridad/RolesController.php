@@ -112,18 +112,19 @@ class RolesController extends Controller
      */
     public function show($id)
     {
-        //
-    }
+        try {
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+            $object = Rol::find($id);
+
+            if(!$object){
+                throw new Exception("Registro inexistente",404);
+            } 
+            $object->permisos;
+
+            return $object;
+        } catch (Exception $e) {
+            return Response::json(['message' => $e->getMessage()], HttpStatusCodes::parse($e->getCode()));
+        }
     }
 
     /**
