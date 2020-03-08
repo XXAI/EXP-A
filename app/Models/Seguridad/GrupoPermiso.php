@@ -3,6 +3,7 @@
 namespace App\Models\Seguridad;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GrupoPermiso extends Model
 {
@@ -12,6 +13,8 @@ class GrupoPermiso extends Model
      * @var string
      */
     protected $table = 'grupo_permisos';
+
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

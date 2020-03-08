@@ -3,6 +3,7 @@
 namespace App\Models\Seguridad;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Rol extends Model
 {
@@ -12,6 +13,9 @@ class Rol extends Model
      * @var string
      */
     protected $table = 'roles';
+    
+    use SoftDeletes;
+
 
     /**
      * The attributes that are mass assignable.

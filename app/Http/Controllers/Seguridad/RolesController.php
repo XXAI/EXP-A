@@ -69,8 +69,6 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        $username = $request['username'];
-
         $rules = [
 
             'nombre' => ['required'],
@@ -88,13 +86,14 @@ class RolesController extends Controller
         if ($validator->fails()) {
             return  response()->json($validator->messages(), 409);
         }
+
         DB::beginTransaction();
         try {
             $rol = Rol::create([
                 'nombre'=> $request['nombre']
             ]);
 
-            $rol->permisos()->attach($request['permisos']);
+            $rol->permisos()->sync($request['permisos']);
             DB::commit();
         }catch (\Exception $e) {
             DB::rollback();
@@ -136,7 +135,44 @@ class RolesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+
+            'nombre' => ['required'],
+            'permisos' => ['required','array'],
+            'permisos.*' => ['exists:App\Models\Seguridad\Permiso,id']
+        ];
+
+        $messages = [
+            'required' => 'required',
+            'array' => 'array',
+            'exists' => 'exists'
+        ];
+
+        DB::beginTransaction();
+        try {
+
+            $rol = Rol::find($id);
+
+            if(!$rol){
+                throw new Exception("Registro inexistente",404);
+            } 
+
+            $validator = Validator::make($request->all(), $rules,$messages);
+
+            if ($validator->fails()) {
+                return  response()->json($validator->messages(), 409);
+            }
+        
+            $rol->nombre = $request['nombre'];
+            $rol->permisos()->sync($request['permisos']);
+            $rol->save();
+            DB::commit();
+        }catch (\Exception $e) {
+            DB::rollback();
+            return Response::json(['error' => $e->getMessage()], HttpResponse::HTTP_CONFLICT);
+        }
+        
+        return $rol;
     }
 
     /**
@@ -147,6 +183,17 @@ class RolesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            //$object = Permiso::destroy($id);
+            $rol = Rol::find($id);
+            if(!$rol){
+                throw new Exception("No de puede borrar un registro inexistente",404);
+            }
+
+            $object = Rol::destroy($id);
+            return Response::json(['data'=>$object],200);
+        } catch (Exception $e) {
+            return Response::json(['message' => $e->getMessage()], HttpStatusCodes::parse($e->getCode()));
+        }
     }
 }
