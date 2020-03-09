@@ -15,7 +15,6 @@ class CrearTablaUsuarios extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->string('id',12);
-            $table->string('servidor_id',4);
             $table->string('username');
             $table->string('password');
             $table->string('api_token', 80)

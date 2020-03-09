@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use \DB, \Response, \Exception; 
 
 use App\Models\Auth\Usuario;
 
@@ -16,10 +18,37 @@ class UsuariosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        return Usuario::all();
+        
+        $params = $request->input();
+        if(isset($params["all"])){
+            
+            return response()->json(["data"=>Usuario::all()]);
+        } else {
+            if(!isset($params['pageSize'])){
+                $params['pageSize'] = 1;
+            }
+            
+           
+            $items = Usuario::select();
+            if(isset($params['orderBy']) && trim($params['orderBy'])!= ""){
+                $sortOrder = 'asc';
+                if(isset($params['sortOrder'])){
+                    $sortOrder = $params['sortOrder'];
+                }
+    
+                $items = $items->orderBy($params['orderBy'],$sortOrder);
+            }
+            if(isset($params['filter']) && trim($params['filter'])!= ""){
+                $items = $items->where("username","LIKE", "%".$params['filter']."%");
+            }
+            
+            $items = $items->paginate($params['pageSize']);
+            
+            return response()->json($items);
+        }
     }
 
     /**
